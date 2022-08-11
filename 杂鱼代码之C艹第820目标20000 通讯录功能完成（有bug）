@@ -1,0 +1,256 @@
+#include <iostream>
+#include <string>
+using namespace std;
+constexpr auto MAX = 1000;
+void menu()
+{
+	cout << "******************************" << endl;
+	cout << "*******  1.添加联系人  *******" << endl;
+	cout << "*******  2.显示联系人  *******" << endl;
+	cout << "*******  3.删除联系人  *******" << endl;
+	cout << "*******  4.查找联系人  *******" << endl;
+	cout << "*******  5.修改联系人  *******" << endl;
+	cout << "*******  6.清空联系人  *******" << endl;
+	cout << "*******  7.退出通讯录  *******" << endl;
+	cout << "******************************" << endl;
+}
+struct person
+{
+	string Name;
+	int Sex;
+	int Age;
+	string Phone;
+	string Addr;
+};
+struct contact
+{
+	struct person Parray[MAX];
+	int size;
+};
+void add(contact* abs) 
+{
+	if (abs->size == MAX)
+	{
+		cout << "联系人已满，添加失败" << endl;
+		return;
+	}
+	else
+	{
+		string name;
+		cout << "请输入姓名" << endl;
+		cin >> name;
+		abs->Parray[abs->size].Name = name;
+		cout << "请输入姓别1.男 2.女" << endl;
+		int sex = 0;
+		while (1)
+		{
+			cin >> sex;
+			if (sex == 1 || sex == 2)
+			{
+				abs->Parray[abs->size].Sex = sex;
+				break;
+			}
+			cin.clear();
+			cin.ignore();
+				cout << "输入错误，请重新输入" << endl;	
+		}
+	}
+	int age;
+	cout << "请输入年龄" << endl;
+	cin >> age;
+	abs->Parray[abs->size].Age = age;
+	string phone;
+	cout << "请输入联系电话" << endl;
+	cin >> phone;
+	abs->Parray[abs->size].Phone = phone;
+	string addr;
+	cout<<"请输入地址"<<endl;
+	cin >> addr;
+	abs->Parray[abs->size].Addr = addr;
+	abs->size++;
+	cout << "添加成功" << endl;
+	system("pause");
+	system("cls");
+}
+void showpar(contact* abs)
+{
+	if (abs->size == 0)
+	{
+		cout << "联系人为空，请添加" << endl;
+	}
+	else
+	{
+		for (int i = 0; i < abs->size; i++)
+		{
+				cout << "姓名：" << abs->Parray[i].Name <<"\t";
+				cout << "姓别：" << (abs->Parray[i].Sex == 1 ? "男" :"女")<< "\t";
+				cout << "年龄：" << abs->Parray[i].Age << "\t";
+				cout << "地址：" << abs->Parray[i].Addr << "\t";
+				cout << "电话：" << abs->Parray[i].Phone << "\t";
+				cout << endl;
+		}
+	}
+	system("pause");
+	system("cls");
+}
+int isExist(contact* abs, string name)
+{
+	for (int i = 0; i < abs->size; i++)
+	{
+		if (abs->Parray[i].Name == name)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+void delcon(contact* abs)
+{
+	cout << "请输入要删除的联系人" << endl;
+	string name;
+	cin >> name;
+	int ret = isExist(abs, name);
+	if (ret != -1)
+	{
+		for (int i = ret; i < abs->size; i++)
+		{
+			abs->Parray[i] = abs->Parray[i + 1];
+		}
+		abs->size--;
+		cout << "删除成功" << endl;
+	}
+	else
+	{
+		cout << "查无此人" << endl;
+	}
+	system("pause");
+    system("cls");
+}
+void inquire(contact* abs)
+{
+	cout << "请输入要查找的联系人" << endl;
+	string name;
+	cin >> name;
+	int ret = isExist(abs, name);
+	if (ret != -1)
+	{
+		cout << "姓名：" << abs->Parray[ret].Name << "\t";
+		cout << "姓别：" << (abs->Parray[ret].Sex == 1 ? "男" : "女") << "\t";
+		cout << "年龄：" << abs->Parray[ret].Age << "\t";
+		cout << "地址：" << abs->Parray[ret].Addr << "\t";
+		cout << "电话：" << abs->Parray[ret].Phone << "\t";
+	}
+	else
+	{
+		cout << "查无此人" << endl;
+		system("pause");
+		system("cls");
+	}
+}
+void modify(contact* abs)
+{
+	cout << "请输入要修改的联系人" << endl;
+	string name;
+	cin >> name;
+	int ret = isExist(abs, name);
+	if (ret != -1)
+	{
+		string name;
+		cout << "请输入姓名" << endl;
+		cin >> name;
+		abs->Parray[ret].Name = name;
+		cout << "请输入姓别1.男 2.女" << endl;
+		int sex = 0;
+		while (1)
+		{
+			cin >> sex;
+			if (sex == 1 || sex == 2)
+			{
+				abs->Parray[ret].Sex = sex;
+				break;
+			}
+			cin.clear();
+			cin.ignore();
+			cout << "输入错误，请重新输入" << endl;
+		}
+	int age;
+	cout << "请输入年龄" << endl;
+	cin >> age;
+	abs->Parray[ret].Age = age;
+	string phone;
+	cout << "请输入联系电话" << endl;
+	cin >> phone;
+	abs->Parray[ret].Phone = phone;
+	string addr;
+	cout << "请输入地址" << endl;
+	cin >> addr;
+	abs->Parray[ret].Addr = addr;
+	abs->size++;
+	cout << "添加成功" << endl;
+	system("pause");
+	system("cls");
+	}
+	else
+	{
+		cout << "查无此人" << endl;
+	}
+}
+void dleall(contact* abs)
+{  
+	cout << "此操作会删除所有联系人信息，确定吗？" << endl;
+	cout << "1.确定 2.返回" << endl;
+	int i = 0;
+	cin >> i;
+	if (i == 2)
+	{
+		return;
+	}
+	system("pause");
+	abs->size = 0;
+	cout << "联系人已清空" << endl;
+	system("pause");
+	system("cls");
+}
+int main()
+{	
+	fflush(stdin);
+	contact abs;
+	abs.size = 0;
+	while (true)
+	{
+		menu();
+		int select = 0;
+		cin >> select;
+		switch (select)
+		{
+		case 1:
+			add(&abs);
+			break;
+		case 2:
+			showpar(&abs);
+			break;
+		case 3:
+			delcon(&abs);
+			break;
+		case 4:
+			inquire(&abs);
+			break;
+		case 5:
+			modify(&abs);
+			break;
+		case 6:
+			dleall(&abs);
+			break;
+		case 7:
+			cout << "退出通讯录" << endl;
+			system("pause");
+			return 0;
+			break;
+		default:
+			cout << "输入错误" << endl;
+			
+		}
+	}
+	system("pause");
+    return 0;
+}
