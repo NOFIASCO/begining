@@ -1,0 +1,83 @@
+//#include <string>
+//#include <ctime>
+//struct student
+//{
+//	string Sname;
+//	int age;
+//	int score;
+//};
+//struct teacher
+//{
+//	string identfy;
+//	struct student Sarray[5];
+//};
+//void allocateSpace(teacher Tarray[], int len)
+//{
+//	string name = "ABCDE";
+//	for (int i = 0; i < len; i++)
+//	{
+//		Tarray[i].identfy = "Teacher-";
+//		Tarray[i].identfy += name[i];
+//		for (int j = 0; j < 5; j++)
+//		{
+//			int sc = rand() %61+40;
+//			Tarray[i].Sarray[j].Sname = "student-";
+//			Tarray[i].Sarray[j].Sname += name[j];
+//			Tarray[i].Sarray[j].score = sc;
+//			Tarray[i].Sarray[j].age = 18;
+//		}
+//	}
+//}
+//void printinfo(teacher Tarray[],int len)
+//{
+//	for (int i = 0; i < len; i++)
+//	{
+//		cout << Tarray[i].identfy << endl;
+//		for (int j = 0; j < 5; j++)
+//		{
+//			cout <<Tarray[i].Sarray[j].Sname<<Tarray[i].Sarray[j].age <<" " << Tarray[i].Sarray[j].score << endl;
+//		}
+//	}
+//}
+//int main()
+//{
+//	srand((unsigned)time(NULL));
+//	struct teacher Tarray[3];
+//	int len = sizeof(Tarray) / sizeof(Tarray[0]);
+//	allocateSpace(Tarray, len);
+//	printinfo(Tarray,len);
+//	system ("pause");
+//	return 0;
+//}
+//void bubble(int* arry, int len)
+//{
+//	for (int i = 0; i < len; i++)
+//	{
+//		for (int j = 0; j < len - i - 1; j++)
+//		{
+//			if (arry[j] > arry[j + 1])
+//			{
+//				int temp = arry[j];
+//				arry[j] = arry[j + 1];
+//				arry[j + 1] = temp;
+//			}
+//		}
+//	}
+//}
+//void ArryPrint(int * arry,int len)
+//{
+//	for (int i = 0; i < len; i++)
+//	{
+//		cout << arry[i] << endl;
+//	}
+//
+//}
+//int main()
+//{
+//	int arry[] = { 2,5,7,3,9,0,1,10,8,4,6 };
+//	int len = sizeof(arry) /sizeof (arry[0]);
+//	bubble(arry,len);
+//	ArryPrint(arry,len);
+//	system("pause");
+//	return 0;
+//}
