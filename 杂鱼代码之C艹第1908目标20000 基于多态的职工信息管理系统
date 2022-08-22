@@ -1,0 +1,615 @@
+#include "worker.h"
+#include <fstream>
+constexpr auto FileName = "empfile.txt";;
+using namespace std;
+class WorkerManager
+{
+public:
+	WorkerManager();
+	bool IsFileEmpty;
+	int EmpNum;
+	worker** Emparry;
+	void SystemOut();
+    void ShowMenu();
+	void ShowEmp();
+	void AddNum();
+	void save();
+	void init_Emp();
+	void DelEmp();
+	void ModEmp();
+	void FindEmp();
+	void ShortEmp();
+	void DelAll();
+	int GetEmpNumber();
+	int IsExist(int id);
+	~WorkerManager();
+};
+#pragma once
+#include <iostream>
+using namespace std;
+class worker
+{
+public:
+	virtual void ShowInfo() = 0;
+	virtual string GetDeptname() = 0;
+	int identfy;
+	string name;
+	int depidentfy;
+};
+#pragma once
+#include <iostream>
+using namespace std;
+#include "worker.h"
+class employee:public worker
+{
+public:
+	employee(int id,string name,int did);
+	void ShowInfo();
+	string GetDeptname();
+};
+#pragma once
+#include <iostream>
+using namespace std;
+#include "worker.h"
+class director :public worker
+{
+public:
+	director(int id, string name, int did);
+	void ShowInfo();
+	string GetDeptname();
+};
+#pragma once
+#include <iostream>
+using namespace std;
+#include "worker.h"
+class boss :public worker
+{
+public:
+	boss(int id, string name, int did);
+	void ShowInfo();
+	string GetDeptname();
+};
+#include "boss.h"
+boss::boss(int id, string name, int did)
+{
+	this->identfy = id;
+	this->name = name;
+	this->depidentfy = did;
+}
+void boss::ShowInfo()
+{
+	cout << "员工编号：" << this->identfy
+		<< "\t姓名：" << this->name
+		<< "\t部门编号：" << this->GetDeptname()
+		<< "\t管理公司所有事务" << endl;
+}
+string boss::GetDeptname()
+{
+	return string("老板");
+}
+#include "director.h"
+director::director(int id, string name, int did)
+{
+	this->identfy = id;
+	this->name = name;
+	this->depidentfy = did;
+}
+void director::ShowInfo()
+{
+	cout << "员工编号：" << this->identfy
+		<< "\t姓名：" << this->name
+		<< "\t部门编号：" << this->GetDeptname()
+		<< "\t完成老板交给的任务，并下发给员工" << endl;
+}
+string director::GetDeptname()
+{
+	return string("经理");
+}
+#include "employee.h"
+employee::employee(int id,string name,int did)
+{
+	this->identfy = id;
+	this->name = name;
+	this->depidentfy = did;
+}
+void employee::ShowInfo()
+{
+	cout << "员工编号：" << this->identfy
+	     << "\t姓名：" << this->name 
+	     << "\t部门编号：" << this->GetDeptname()
+		 << "\t完成经理交给的任务" << endl;
+}
+string employee::GetDeptname()
+{
+	return string("员工");
+}
+#include <iostream>
+using namespace std;
+#include "Workermanager.h"
+#include "employee.h"
+#include "director.h"
+#include "boss.h"
+int main()
+{
+	WorkerManager Wm;
+	int choice = 0;
+	while (1)
+	{ 
+		Wm.ShowMenu();
+		cout << "请选择要使用的功能" << endl;
+		cin >> choice; 
+		switch (choice)
+		{
+		case 0:
+			Wm.SystemOut();
+			break;
+		case 1:
+			Wm.AddNum();
+			break;
+		case 2:
+			Wm.ShowEmp();
+			break;
+		case 3:
+			Wm.DelEmp();
+			break;
+		case 4:
+			Wm.ModEmp();
+			break;
+		case 5:
+			Wm.FindEmp();
+			break;
+		case 6:
+			Wm.ShortEmp();
+			break;
+		case 7:
+			Wm.DelAll();
+			break;
+		default:
+			cout << "输出错误请重新输入" << endl;
+			system("pause");
+			system("cls");
+			break;
+		}
+	}
+	system("pause");
+	return 0;
+}
+#include "Workermanager.h"
+#include "employee.h"
+#include "boss.h"
+#include "director.h"
+void WorkerManager::ShowMenu()
+{
+	cout << "***********************************************" << endl;
+	cout << "*********     欢迎使用职工管理系统   **********" << endl;
+	cout << "*********          0.退出软件        **********" << endl;
+	cout << "*********        1.增加职工信息      **********" << endl;
+	cout << "*********        2.显示职工信息      **********" << endl;
+	cout << "*********        3.删除职工信息      **********" << endl;
+	cout << "*********        4.修改职工信息      **********" << endl;
+	cout << "*********        5.查找职工信息      **********" << endl;
+	cout << "*********        6.按照编号排序      **********" << endl;
+	cout << "*********        7.清空所有文档      **********" << endl;
+	cout << "***********************************************" << endl;
+	cout << endl;
+}
+WorkerManager::WorkerManager()
+{
+	this->EmpNum = 0;
+	this->Emparry = NULL;
+	ifstream ifs;
+	ifs.open(FileName, ios::in);
+	if (!ifs.is_open())
+	{
+		cout << "文件不存在" << endl;
+		this->EmpNum = 0;
+		this->Emparry = NULL;
+		this->IsFileEmpty = true;
+		ifs.close();
+		return;
+	}
+	char ch;
+	ifs >> ch;
+	if (ifs.eof())
+	{
+		cout << "文件夹为空" << endl;
+		this->EmpNum = 0;
+		this->Emparry = NULL;
+		this->IsFileEmpty = true;
+		ifs.close();
+		return;
+	}
+	int num = this->GetEmpNumber();
+	cout << "职工人数为： " << num << endl;
+	this->EmpNum = num;
+
+	this->Emparry = new worker * [this->EmpNum];
+	this->init_Emp();
+}
+void WorkerManager::DelAll()
+{
+	cout << "删除所有人信息，确定吗？\t1.确定\t2.返回" << endl;
+	int select = 0;
+	cin >> select;
+	if (select == 1)
+	{
+		if (this->Emparry != NULL)
+		{
+			for (int i = 0; i < this->EmpNum; i++)
+			{
+				if (this->Emparry[i] != NULL)
+				{
+					delete this->Emparry[i];
+				}
+			}
+			this->EmpNum = 0;
+			delete[]this->Emparry;
+			this->Emparry = NULL;
+			this->IsFileEmpty = true;
+			cout << "删除成功" << endl;
+		}
+	}
+	else
+	{
+		cout << "取消操作" << endl;
+		exit(0);
+	}
+}
+void WorkerManager::ShortEmp()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	cout << "请输入排序方式\t1.顺序\t2.反序" << endl;
+	int select = 0;
+	cin>>select;
+		for (int i = 0; i < this->EmpNum; i++)
+		{
+			int minormax = i;
+			for (int j = i + 1; j < this->EmpNum; j++)
+			{
+				if (select == 1)
+				{
+					if (this->Emparry[minormax]->identfy > this->Emparry[j]->identfy)
+					{
+						minormax = j;
+					}
+				}
+				else
+				{
+					if (this->Emparry[minormax]->identfy < this->Emparry[j]->identfy)
+					{
+						minormax = j;
+					}
+				}
+			}
+			if (i != minormax)
+			{
+				worker* temp = this->Emparry[i];
+				this->Emparry[i] = this->Emparry[minormax];
+				this->Emparry[minormax] = temp;
+			}
+		}
+		cout << "排序完毕，新的顺序为：" << endl;
+		this->save();
+		this->ShowEmp();
+}
+void WorkerManager::FindEmp()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	cout << "请输选择查找方式\t1.员工编号\t2.姓名：" << endl;
+	int select = 0;
+	cin >> select;
+	if (select == 1)
+	{
+		cout << "请输入员工编号：" << endl;
+		int id = 0;
+		cin >> id;
+		int ret = this->IsExist(id);
+		if (ret == -1)
+		{
+			cout << "查无此人，请检车输入" << endl;
+		}
+		else
+		{
+			system("cls");
+			this->Emparry[ret]->ShowInfo();
+		}
+	}
+	else
+	{
+		cout << "请输入员工姓名" << endl;
+		{
+			string ename = "";
+			cin >> ename;
+			bool flag = false;
+			for (int i = 0; i < this->EmpNum; i++)
+			{
+				if (this->Emparry[i]->name == ename)
+				{
+					system("cls");
+					this->Emparry[i]->ShowInfo();
+					flag = true;
+				}
+			}
+			if (flag == false)
+			{
+				system("cls");
+				cout << "查无此人，请检查输入" << endl;
+			}
+		}
+	}
+}
+void WorkerManager::ModEmp()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	else
+	{
+		cout << "请输入要修改的员工编号" << endl;
+		int id = 0;
+		cin >> id;
+		int ret = this->IsExist(id);
+		if (ret != -1)
+		{
+			delete this->Emparry[ret];
+			int newid = 0;
+			string newname = "";
+			int select = 0;
+			cout << "查到：" << id << "号职工，请输入新职工号" << endl;
+			cin >> newid;
+			cout << "请输入姓名" << endl;
+			cin >> newname;
+			cout << "请选择该职工岗位" << endl;
+			cout << "1.普通员工" << endl;
+			cout << "2.老板" << endl;
+			cout << "3.经理" << endl;
+			cin >> select;
+			worker* worker = NULL;
+			switch (select)
+			{
+			case 1:
+				worker = new employee(id, newname, select);
+				break;
+			case 2:
+				worker = new boss(id, newname, select);
+				break;
+			case 3:
+				worker = new director(id, newname, select);
+				break;
+			default:
+				cout << "输入错误" << endl;
+			}
+			this->Emparry[ret] = worker;
+			cout << "修改成功" << endl;
+			this->save();
+		}
+		else
+		{
+			cout << "修改失败，查无此人" << endl;
+		}
+	}
+	system("pause");
+	system("cls");
+}
+void WorkerManager::DelEmp()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	else
+	{
+		cout << "请输入要删除的员工编号" << endl;
+		int id;
+		cin >> id;
+		this->IsExist(id);
+		int index = this->IsExist(id);
+		if (index != -1)
+		{
+			for (int i = 0; i < this->EmpNum - 1; i++)
+			{
+				this->Emparry[i] = this->Emparry[i + 1];
+			}
+			this->EmpNum--;
+			this->save();
+			cout << "删除成功" << endl;
+		}
+		else
+		{
+			cout << "删除失败，未找到该员工" << endl;
+		}
+	}
+	system("pause");
+	system("cls");
+}
+int WorkerManager::IsExist(int id)
+{
+	int index = -1;
+	for (int i = 0; i < this->EmpNum; i++)
+	{
+		if (this->Emparry[i]->identfy == id)
+		{
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+void WorkerManager::ShowEmp()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	else
+	{
+		for (int i = 0; i < EmpNum; i++)
+		{
+			this->Emparry[i]->ShowInfo();
+		}
+	}
+	system("pause");
+	system("cls"); 
+}
+void WorkerManager::init_Emp()
+{
+	ifstream ifs;
+	ifs.open(FileName, ios::in);
+	int id;
+	string name;
+	int did;
+	int index = 0;
+	while (ifs >> id && ifs >> name && ifs >> did)
+	{
+		worker* worker = NULL;
+		if(did == 1)
+		{
+			worker = new employee(id, name, did);
+		}
+		else if (did == 2)
+		{
+			worker = new boss(id, name, did);			
+		}
+		else
+		{
+			worker = new director(id, name, did);
+		}
+		this->Emparry[index] = worker;
+		index++;
+	}
+	ifs.close();
+}
+int WorkerManager::GetEmpNumber()
+{
+	if (this->IsFileEmpty)
+	{
+		cout << "文件不存在或记录为空" << endl;
+		system("pause");
+		system("cls");
+	}
+	ifstream ifs;
+	ifs.open(FileName, ios::in);
+	int id;
+	string name;
+	int did;
+	int num = 0;
+	while (ifs >> id && ifs >> name && ifs >> did)
+	{
+		num++;
+	}
+	ifs.close();
+	return num;
+}
+void WorkerManager::save()
+{
+	ofstream ofs;
+	ofs.open(FileName, ios::out);
+	for (int i = 0; i < this->EmpNum; i++)
+	{
+		ofs << this->Emparry[i]->identfy << " "
+			<< this->Emparry[i]->name << " "
+			<< this->Emparry[i]->depidentfy << endl;
+	}
+	ofs.close();
+}
+void WorkerManager::AddNum()
+{
+	cout << "请增输入要增加的员工数量" << endl;
+	int addnum = 0;
+	cin >> addnum;
+	if (addnum > 0)
+	{
+		int newsize = this->EmpNum + addnum;
+		worker** newspace = new worker * [newsize + 4];
+		if (this->Emparry != NULL)
+		{
+			for (int i = 0; i < this->EmpNum; i++)
+			{
+				newspace[i] = this->Emparry[i];
+			}
+		}
+		for (int i = 0; i < addnum; i++)
+		{
+			int id;
+			string name;
+			int dselect;
+			cout << "请输入第" << i + 1 << "个新员工编号" << endl;
+			flag:
+			cin >> id;
+			for (int i = 0; i < this->EmpNum; i++)
+			{
+				if (this->Emparry[i]->identfy == id)
+				{
+					cout << "编号已被使用，请检查输入" << endl;
+					goto flag;
+				}
+			}
+			cout << "请输入第" << i + 1 << "个新员工姓名" << endl;
+			cin >> name;
+			cout << "请选择该职工岗位" << endl;
+			cout << "1.普通员工" << endl;
+			cout << "2.老板" << endl;
+			cout << "3.经理" << endl;
+			cin >> dselect;
+			worker* worker = NULL;
+			switch (dselect)
+			{
+			case 1:
+				worker = new employee(id, name, 1);
+				break;
+			case 2:
+				worker = new boss(id, name, 2);
+				break;
+			case 3:
+				worker = new director(id, name, 3);
+				break;
+			default:
+				cout << "输入错误" << endl;
+				break;
+			}
+			newspace[this->EmpNum + i] = worker;
+		}
+		delete[]this->Emparry;
+		this->Emparry = newspace;
+		this->EmpNum = newsize;
+		cout << "成功增加" << addnum << "名新员工" << endl;
+		this->save();
+	}
+	else
+	{
+		cout << "输入有误，请重新输入" << endl;
+	}
+	system("pause");
+	system("cls");
+}
+WorkerManager::~WorkerManager()
+{
+	if (this->Emparry != NULL)
+	{
+		delete[]this->Emparry;
+		this->Emparry = NULL;
+	}
+}
+void WorkerManager::SystemOut()
+{
+	cout << "欢迎下次使用" << endl;
+	system("pause");
+	exit(0);
+}
