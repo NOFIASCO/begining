@@ -1,0 +1,57 @@
+#include <Windows.h>
+LRESULT CALLBACK WindowProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	case WM_LBUTTONDOWN:
+	{
+		int xPos = LOWORD(lParam);
+		int YPos = HIWORD(lParam);
+		MessageBox(hwnd, TEXT("NMSL"), TEXT("走两步？"),MB_OK);
+	}
+	break;
+	case WM_KEYDOWN:
+		MessageBox(hwnd, TEXT("ZSYC"), TEXT("AAAA"), MB_OK);
+	break;
+	default:
+		break;
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdline, int nShowCmd)
+{
+	WNDCLASS wc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wc.hCursor = LoadCursor(NULL, IDC_HAND);
+	wc.hIcon = LoadIcon(NULL, IDI_ERROR);
+	wc.hInstance = hInstance;
+	wc.lpfnWndProc = WindowProc;
+	wc.lpszClassName = TEXT("WIN");
+	wc.lpszMenuName = NULL;
+	wc.style = 0;
+	RegisterClass(&wc);
+	//(lpClassName, lpWindowName, dwStyle, x, y, \
+		nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam)
+	HWND hwnd = CreateWindow(wc.lpszClassName, TEXT("WIN"), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL,NULL, hInstance, NULL);
+	ShowWindow(hwnd,SW_SHOWNORMAL);
+	UpdateWindow(hwnd);
+	MSG msg;
+	while (1)
+	{
+		if (GetMessage(&msg, NULL, 0, 0) == FALSE)
+		{
+			break;
+		}
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return 0;
+}
