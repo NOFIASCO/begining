@@ -1,0 +1,94 @@
+#include <iostream>//原题是通过while循环让用户可以重复输入整数多次计算知道用户选择N选项，我这里做了更改串联前面学的vector容器，以及职工管理系统的添加职工方法，让用户一次输入
+多个数据，一次性计算个结果
+using namespace std;
+#include <vector>
+bool fibon_elem(int pos, int& elem)
+{
+	if (pos <= 0 || pos >= 1024)
+	{
+		cout << "CNM" << endl;
+		elem = 0;
+		return false;
+	}
+	elem = 1;
+	int n2 = 1, n1 = 1;
+	for (int i = 3; i <= pos; ++i)
+	{
+		elem = n1 + n2;
+		n1 = n2;
+		n2 = elem;
+	}
+	return true;
+}
+int main()
+{
+	vector<int>v;
+	int addnum;
+	cout << "please enter how many position will you wanna caclulate :";
+	cin >> addnum;
+	if (addnum > 0)
+	{
+		for (int i = 0; i < addnum; ++i)
+		{
+			cout << "please enter your " << i+1 << " position" << endl;
+			int enter;
+			cin >> enter;
+			v.push_back(enter);
+		}
+		for (int i = 0; i < v.size(); ++i)
+		{
+			int elem;
+			if (fibon_elem(v[i], elem))
+			{
+				cout << "your " << v[i] << " finbonac position is " << elem << endl;
+			}
+		}
+	}
+}
+// int main()
+//{
+//    int pos, elem;
+//    char ch;
+//    bool more = true;
+//
+//    while (more) {
+//        cout << "Please enter a position: ";
+//        cin >> pos;
+//
+//        if (fibon_elem(pos, elem)) {
+//            cout << "element # " << pos
+//                << " is " << elem << endl;
+//        }
+//        else {
+//            cout << "Sorry. Could not calculate element # "
+//                << pos << endl;
+//        }
+//        cout << "Do you want to calculate any other numbers?(y/n)";
+//        cin >> ch;
+//
+//        if (ch != 'y' && ch != 'Y') {
+//            more = false;
+//        }
+//    }
+//}
+//
+//bool fibon_elem(int pos, int& elem) {
+//    // 检查位置值是否合理
+//    if (pos <= 0 || pos > 1024) {
+//        elem = 0;
+//        return false;
+//    }
+//
+//    elem = 1;
+//    int n_2 = 1, n_1 = 1;
+//
+//    for (int xi = 3; xi <= pos; ++xi) {
+//        elem = n_2 + n_1;
+//        n_2 = n_1;
+//        n_1 = elem;
+//    }
+//    return true;
+//}
+//int main(void)
+//{
+//}
