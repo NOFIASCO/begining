@@ -1,0 +1,66 @@
+#include <iostream>//在原题基础上做了改动原题要求编辑文本程序读写，排序，输出
+#include <algorithm>//我增加了代码完成程序内输入文本，保存文件，读取文件，排序，另存为，读取文件，打印输出
+#include <string>
+#include <vector>
+#include <fstream>
+using namespace std;
+constexpr auto FileName = "name.txt";
+int main()
+{
+	ofstream ofs;
+	ofs.open(FileName, ios::out);
+	int addnum;
+	cout << "please enter how many name you wanna add: ";
+	cin >> addnum;
+	string* p = new string[addnum];
+	if (addnum > 0)
+	{
+		for (int i = 0; i < addnum; ++i)
+		{
+			cout << "please enter your " << i + 1 << " user name: ";
+			string name = "";
+			cin >> name;
+			p[i] = name;
+			cout << endl;
+		}
+		for (int i = 0; i < addnum; ++i)
+		{
+			ofs << p[i] << " ";
+			cout << endl;
+		}
+		ofs.close();
+	}
+	vector<string>v;
+	vector<string>::iterator itbegin = v.begin();
+	vector<string>::iterator itend = v.end();
+	if (!p)
+	{
+		cout << "file is empty" << endl;
+	}
+	ifstream file("D:\\32\\PRJ\\essential\\essential\\name.txt");
+	string name;
+	while (file >> name)
+	{
+			v.push_back(name);
+	}
+	cout << "this is your name text before short: ";
+	for (vector<string>::iterator it = v.begin(); it != v.end(); ++it)
+	{
+		cout << *it << " ";
+	}
+	cout << endl;
+	sort(v.begin(), v.end());
+	ofstream outfile("D:\\32\\PRJ\\essential\\essential\\sorted.txt");
+	for (int i = 0; i < v.size(); ++i)
+	{
+		outfile << v[i] << " ";
+	}
+	outfile << endl;
+	cout << "this is your name text after sort: ";
+	ifstream("D:\\32\\PRJ\\essential\\essential\\sorted.txt");
+	for (vector<string>::iterator it = v.begin(); it != v.end(); ++it)
+	{
+		cout << *it << " ";
+	}
+	return 0;
+}
