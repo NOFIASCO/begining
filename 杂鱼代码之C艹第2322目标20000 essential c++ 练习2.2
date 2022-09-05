@@ -1,0 +1,44 @@
+//esential c++ 练习 2.2
+//讲道理，外国人写的东西翻译过来是真难理解
+#include <iostream>
+#include <fstream>
+#include <vector>
+using namespace std;
+bool Penta(vector<int>&vec, int pos)
+{
+	if (pos <= 0 || pos > 64)
+	{
+		cout << "sorry:invalid posstion " << endl;
+		return false;
+	}
+	else
+	for (int i = vec.size()+1; i <= pos; ++i)
+	{
+		 vec.push_back((i * (3 * i - 1)) / 2);
+	}
+	return true;
+}
+void Display_elements(vector<int>& vec, const string& title, ostream& os = cout)
+{
+	os << "\n" << title << "\t" << endl;
+	for (vector<int>::iterator itbegin = vec.begin(); itbegin != vec.end(); ++itbegin)
+	{
+		cout << *itbegin << " ";	
+	}
+	cout << endl;
+}
+int main()
+{
+	vector<int>pent;
+	const string title("pentagonal numeric series ");
+
+	if (Penta(pent, 0))
+		Display_elements(pent, title);
+	if (Penta(pent, 8))
+		Display_elements(pent, title);
+	if (Penta(pent, 14))
+		Display_elements(pent, title);
+	if (Penta(pent, 138))
+		Display_elements(pent, title);
+
+}
