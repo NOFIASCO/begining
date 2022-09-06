@@ -1,4 +1,4 @@
-//esential c++ 练习 2.2 2.3
+//esential c++ 练习 2.2 2.3 2.4
 //讲道理，外国人写的东西翻译过来是真难理解
 #include <iostream>
 #include <fstream>
@@ -88,4 +88,47 @@ int main()
 		Display_elements(pent, title);
 	if (IsSizeOk(pent, 138))
 		Display_elements(pent, title);
+}
+//esential c++ 练习 2.4
+#include <iostream>
+#include <vector>
+using namespace std;
+bool Checksize(int pos)
+{
+	return(pos <= 0 || pos > 64) ? false : true;
+}
+const vector <int>* Penta_seriers(int pos)
+{
+	static vector <int> elem;
+	if (Checksize(pos) && pos > elem.size())
+	{
+		for (int i = elem.size() + 1; i <= pos; ++i)//这里如果不加等于符号会报错vector subscript out of range原因暂时没想通
+			elem.push_back((i*(3*i-1))/2);
+		return &elem;
+	}
+}
+bool caclulation(int pos, int& elem)
+{
+	if (!Checksize(pos))
+	{
+	    cout << "Error:invalid position!!! " << elem << endl;
+	    elem = 0;
+	    return false;
+    }
+	const vector <int>* pent = Penta_seriers(pos);
+	elem = (*pent)[pos - 1];
+	return true;
+}
+int main()
+{
+	int elem;
+	if (caclulation(8, elem))
+		cout << "the position 8 is " << elem << endl;
+	if (caclulation(88, elem))
+		cout << "the position 88 is " << elem << endl;
+	if (caclulation(12, elem))
+		cout << "the position 12 is " << elem << endl;
+	if (caclulation(64, elem))
+		cout << "the position 64 is " << elem << endl;
+
 }
