@@ -1,0 +1,50 @@
+#include <Windows.h>
+#include <iostream>
+LRESULT CALLBACK WindowProc(
+	_In_ HWND hwnd,
+	_In_ UINT uMsg,
+	_In_ WPARAM wParam,
+	_In_ LPARAM lParam
+)
+{
+	switch (uMsg)
+	{
+	case WM_CREATE:
+		MessageBoxA(hwnd, "create", "point out", MB_OK);
+		break;
+	case WM_CLOSE:
+		MessageBoxA(hwnd, "destory", "point out", MB_OK);
+		DestroyWindow(hwnd);
+		PostQuitMessage(0);
+		break;
+	default:
+		break;
+	}
+	return DefWindowProcA(hwnd,uMsg,wParam,lParam);
+}
+int APIENTRY wWinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR lpCmdLine,
+	_In_ int nShowCmd
+)
+{
+	WNDCLASSA mYwindows = { 0 };
+	mYwindows.lpszClassName = "Mywindows";
+	mYwindows.lpfnWndProc = WindowProc;
+	RegisterClass(&mYwindows);
+	HWND hwindow = CreateWindowExA(0, mYwindows.lpszClassName,
+		                           "Mywindos",
+		                           WS_OVERLAPPEDWINDOW, 
+		                           CW_USEDEFAULT,0,
+		                           CW_USEDEFAULT, 0, 
+		                           NULL, NULL,hInstance,0);
+	ShowWindow(hwindow, SW_SHOWNORMAL);
+	/*MessageBoxA(0,"s","this is title",MB_OK);*/
+	MSG msg = { 0 };
+	while (GetMessageA(&msg,0,0,0))
+	{
+		DispatchMessageA(&msg);
+	}
+	return 0;
+}
