@@ -1,0 +1,167 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "BaseGeometryActor.h"
+#include "GeometryhubActor.generated.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogGeometryhub,All,All)
+
+USTRUCT(BluePrintType)
+struct FGeometryPayLoad
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<ABaseGeometryActor> geometryclass;
+
+	UPROPERTY(EditAnywhere)
+		FGeometryData data;
+
+	UPROPERTY(EditAnywhere)
+		FTransform initialtransform;
+
+};
+
+UCLASS()
+class FL_API AGeometryhubActor : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	AGeometryhubActor();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<ABaseGeometryActor> geometryclass;
+
+	UPROPERTY(EditAnywhere)
+		TArray<FGeometryPayLoad> geometryload;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	void actorSpawn1();
+	void actorSpawn3();
+	void actorSpawn2();
+
+	UFUNCTION()  
+	void onColorChanged(const FLinearColor& color, const FString& name);
+
+	void onTimerFinished(AActor* actor);
+};
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "GeometryhubActor.h"
+#include "Engine/World.h"
+// Sets default values
+AGeometryhubActor::AGeometryhubActor()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+}
+
+// Called when the game starts or when spawned
+void AGeometryhubActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//actorSpawn1();
+	//actorSpawn2();
+	actorSpawn3();
+}
+
+// Called every frame
+void AGeometryhubActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AGeometryhubActor::onColorChanged(const FLinearColor& color, const FString& name)
+{
+	UE_LOG(LogGeometryhub, Warning, TEXT("Actor name is: %s Clolr is: %s"), *name, *color.ToString());
+}
+
+void AGeometryhubActor::onTimerFinished(AActor* actor)
+{
+	if (!actor)return;
+	UE_LOG(LogGeometryhub, Error, TEXT("Timer has finished: %s"), *actor->GetName());
+
+	ABaseGeometryActor* geometry = Cast<ABaseGeometryActor>(actor);
+
+	if (!geometry)return;
+
+	UE_LOG(LogGeometryhub, Display, TEXT("the cast has succed!!amplitude: %f"), geometry->getgeometrydata().amplitude);
+
+	geometry->Destroy();
+	//geometry->SetLifeSpan(2.0f);
+}
+
+void AGeometryhubActor::actorSpawn1()
+{
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		for (int32 i = 0; i < 10; ++i)
+		{
+			const FTransform geometrytransform = FTransform(FRotator::ZeroRotator, FVector(0.0f, 300.0f * i, 300.0f));
+			ABaseGeometryActor* geometry = world->SpawnActor<ABaseGeometryActor>(geometryclass, geometrytransform);
+			if (geometry)
+			{
+				FGeometryData data;
+				data.movetype = FMath::RandBool() ? EMovementTypes::Static : EMovementTypes::Sin;
+				geometry->setGeometryData(data);
+			}
+		}
+	}
+}
+
+void AGeometryhubActor::actorSpawn2()
+{
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		for (int32 i = 0; i < 10; ++i)
+		{
+			const FTransform geometrytransform = FTransform(FRotator::ZeroRotator, FVector(0.0f, 300.0f * i, 600.0f));
+			ABaseGeometryActor* geometry = world->SpawnActorDeferred<ABaseGeometryActor>(geometryclass, geometrytransform);
+			if (geometry)
+			{
+				FGeometryData data;
+				data.movetype = FMath::RandBool() ? EMovementTypes::Sin : EMovementTypes::Static;
+				data.color = FLinearColor::MakeRandomColor();
+				geometry->setGeometryData(data);
+				geometry->FinishSpawning(geometrytransform);
+			}
+		}
+	}
+}
+
+void AGeometryhubActor::actorSpawn3()
+{
+	UWorld* world = GetWorld();
+	if (world)
+	{
+		for (const FGeometryPayLoad playload : geometryload)
+		{
+			ABaseGeometryActor* geometry = world->SpawnActorDeferred<ABaseGeometryActor>(playload.geometryclass, playload.initialtransform);
+			if (geometry)
+			{
+				geometry->setGeometryData(playload.data);
+				geometry->oncololrchanged.AddDynamic(this,&AGeometryhubActor::onColorChanged);
+				geometry->ontimerfinished.AddUObject(this, &AGeometryhubActor::onTimerFinished);
+				geometry->FinishSpawning(playload.initialtransform);
+			}
+		}
+	}
+}
