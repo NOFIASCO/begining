@@ -1,0 +1,256 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "Components/StaticMeshComponent.h"
+#include "BaseGeometryActor.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnColorChanged, const FLinearColor&, color, const FString&, name);
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTimerFinished, AActor*);
+
+UENUM(BlueprintType)
+enum class EMovementTypes :uint8
+{
+	Sin,
+	Static
+};
+
+USTRUCT(BluePrintType)
+struct FGeometryData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "movement")
+		float amplitude = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "movement")
+		float frequency = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "movement")
+		EMovementTypes movetype = EMovementTypes::Static;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "design")
+		FLinearColor color = FLinearColor::Black;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "design")
+		float timerate = 3.0f;
+
+};
+
+UCLASS()
+class FL_API ABaseGeometryActor : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	ABaseGeometryActor();
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* BaseMesh;
+
+	void setGeometryData(const FGeometryData& data) { geometrydata = data; }
+
+	UFUNCTION(BlueprintCallable)
+	FGeometryData getgeometrydata() const { return geometrydata; }
+
+	UPROPERTY(BlueprintAssignable)
+		FOnColorChanged oncololrchanged;
+
+	    FOnTimerFinished ontimerfinished;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	virtual void EndPlay(const EEndPlayReason::Type endplayreason)override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "geometrydata")
+		FGeometryData geometrydata;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	    int32 weaponsnum = 4;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "kills")
+	    int32 killsnum = 7;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "health")
+	    float health = 34.325375f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "health")
+	    bool isdead = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "weapon")
+	    bool haseweapon = true;
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+private:
+	FVector initialocation;
+	FTimerHandle timerhandle;
+
+	const int32 maxtimecount = 5;
+	int32 timecount = 0;
+
+	void printTypes();
+	void printStringTypes();
+	void printTransForm();
+
+	void handleMove();
+	void timerStart();
+
+	void handleColor(const FLinearColor& color);
+
+};
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "BaseGeometryActor.h"
+#include "Engine/Engine.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "TimerManager.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogBaseGeometry,All,All)
+// Sets default values
+ABaseGeometryActor::ABaseGeometryActor()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("cube");
+	SetRootComponent(BaseMesh);
+}
+
+// Called when the game starts or when spawned
+void ABaseGeometryActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	printTransForm();
+	printTypes();
+	printStringTypes(); 
+
+	handleColor(geometrydata.color);
+
+	GetWorldTimerManager().SetTimer(timerhandle, this, &ABaseGeometryActor::timerStart, geometrydata.timerate, true);
+
+	initialocation = GetActorLocation();
+	
+} 
+
+// Called every frame
+void ABaseGeometryActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	handleMove();
+}
+
+void ABaseGeometryActor::EndPlay(const EEndPlayReason::Type endplayreason)
+{
+	UE_LOG(LogBaseGeometry, Warning, TEXT("actor %s has been destoryed"), *GetName())
+	Super::EndPlay(endplayreason);
+}
+
+void ABaseGeometryActor::handleColor(const FLinearColor& color)
+{
+	if (!BaseMesh)return;
+	{
+		UMaterialInstanceDynamic* dynametrial = BaseMesh->CreateAndSetMaterialInstanceDynamic(0);
+
+		if (dynametrial)
+		{
+			dynametrial->SetVectorParameterValue("color", color);
+		}
+	}
+}
+
+void ABaseGeometryActor::timerStart()
+{
+	if (++timecount < maxtimecount)
+	{
+		const FLinearColor newcolor = FLinearColor::MakeRandomColor();
+
+		UE_LOG(LogBaseGeometry, Display, TEXT("timecount is:%i current color is:%s "), timecount ,*newcolor.ToString())
+			handleColor(newcolor);
+		oncololrchanged.Broadcast(newcolor, GetName());
+	}
+	else
+	{
+		UE_LOG(LogBaseGeometry, Warning, TEXT("timecount has stopped!!!"))
+		GetWorldTimerManager().ClearTimer(timerhandle);
+		ontimerfinished.Broadcast(this);
+	}
+}
+
+void ABaseGeometryActor::handleMove()
+{ 
+	switch (geometrydata.movetype)
+	{
+	case EMovementTypes::Sin:
+	{
+		FVector currentlocation = GetActorLocation();
+		float time = GetWorld()->GetTimeSeconds();
+		currentlocation.Z = initialocation.Z + geometrydata.amplitude * FMath::Sin(geometrydata.frequency * time);
+		SetActorLocation(currentlocation);
+	}
+	break;
+	case EMovementTypes::Static:break;
+	default:break;
+	}
+}
+
+void ABaseGeometryActor::printTypes()
+{
+	UE_LOG(LogBaseGeometry, Warning, TEXT("the name is:%s"), *GetName())
+	UE_LOG(LogBaseGeometry, Warning, TEXT("weapons num is: %d,killsnum is: %d"), weaponsnum, killsnum);
+	UE_LOG(LogBaseGeometry, Warning, TEXT("is dead: %d"), isdead);
+	UE_LOG(LogBaseGeometry, Warning, TEXT("health:%f"), health);
+	UE_LOG(LogBaseGeometry, Warning, TEXT("health:%.2f"), health);
+	UE_LOG(LogBaseGeometry, Warning, TEXT("hasweapon:%d"), static_cast<int>(haseweapon));
+}
+
+void ABaseGeometryActor::printStringTypes()
+{
+	FString name = "yuanshengjie";
+	UE_LOG(LogBaseGeometry, Display, TEXT("name is:%s"), *name);
+	UE_LOG(LogTemp, Display, TEXT("Hallo ue"));
+	UE_LOG(LogTemp, Warning, TEXT("warning ue"));
+	UE_LOG(LogTemp, Error, TEXT("erro ue"));
+	UE_LOG(LogTemp, Warning, TEXT("warning2 ue"));
+
+	//int32 weaponsnum = 4;
+	//int32 killsnum = 7;
+	//float health = 34.325375f;
+	//bool isdead = false;
+	//bool haseweapon = true;
+
+	FString weponsnumis = "weapons num = " + FString::FromInt(weaponsnum);
+	FString healthstr = "health is = " + FString::SanitizeFloat(health);
+	FString isdeadstr = "is dead = " + FString(isdead ? "true" : "fasle");
+	FString stat = FString::Printf(TEXT(" \n == ALL Stat == \n %s \n %s \n %s "), *weponsnumis, *healthstr, *isdeadstr);
+
+	UE_LOG(LogBaseGeometry, Warning, TEXT("%s"), *stat);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, name);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, stat, true, FVector2D(1.5f, 1.5f));
+	}
+	
+}
+
+void ABaseGeometryActor::printTransForm()
+{
+	FTransform transform = GetActorTransform();
+	FVector location = transform.GetLocation();
+	FRotator rotator = transform.Rotator();
+	FVector scale = transform.GetScale3D();
+
+	UE_LOG(LogBaseGeometry, Warning, TEXT("thw transfom member is :%s,%s\n,%s,%s\n")
+		, *transform.ToString(), *location.ToString(), *rotator.ToString(), *scale.ToString())
+
+	UE_LOG(LogBaseGeometry, Error, TEXT("the transfrom more detale :%s"), *transform.ToHumanReadableString())
+
+}
